@@ -156,9 +156,12 @@ class Server(object):
         client = self.client_list[client_index]
         #传入的全局模型是深度复制的，以防止原模型受到影响
         #返回本地模型、本地损失和本地准确率
-        local_model, local_acc, local_loss = client.train(deepcopy(self.global_model), tracking=False)
+        local_model, local_acc, local_loss, local_batch_time, local_batch_loss = client.train(deepcopy(self.global_model), tracking=False)
         #清除 GPU 缓存的函数
         torch.cuda.empty_cache()
+
+        client.batch_time=local_batch_time
+        client.loss_contribution=len(client.local_train_data)*local_batch_loss/self.train_sizes
 
         #返回本地训练后的模型深度拷贝、损失、和准确率
         return deepcopy(local_model.cpu()), local_loss, local_acc # / self.train_sizes[client_index]

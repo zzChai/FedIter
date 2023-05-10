@@ -164,6 +164,10 @@ if __name__ == '__main__':
     #创建服务器对象
     ServerExecute = Server(dataset, model, args, client_selection, fed_algo)
 
+    #数据预处理，所有客户端，都执行一个epoch,求得每个客户端的batch_time,存client
+    #所有客户端迭代时间、收敛贡献、数据价值，可以有个初始值
+
+
     # 训练n轮
     ServerExecute.train()
 

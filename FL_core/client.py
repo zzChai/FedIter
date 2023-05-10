@@ -9,6 +9,8 @@ class Client(object):
         self.device = args.device
         self.trainer = Trainer(model, args) #每个Client对象都有个对应的Trainer对象
         self.num_epoch = args.num_epoch # local epochs E
+        self.batch_time= 0.0
+        self.loss_contribution=0.0
 
     def train(self, global_model, tracking=True):
         self.trainer.set_model(global_model)
@@ -16,10 +18,12 @@ class Client(object):
             acc, loss = self.trainer.train_E0(self.local_train_data, tracking)
         else:
             #走这条
-            acc, loss = self.trainer.train(self.local_train_data, tracking)
+            acc, loss, batch_time, batch_loss = self.trainer.train(self.local_train_data, tracking)
         #拿到这个client更新后的模型
         model = self.trainer.get_model()
-        return model, acc, loss
+        #self.batch_time=batch_time
+        #self.batch_loss=batch_loss
+        return model, acc, loss, batch_time, batch_loss
 
     def test(self, model, mode='test'):
         if mode == 'train':

@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 from sklearn.metrics import roc_auc_score
+import time
 
 '''
 模型训练器,包括对模型进行训练和测试。
@@ -51,16 +52,22 @@ class Trainer:
         else:
             #Adam 优化器，动态调整每个参数的学习率，从而加快收敛速度,但本实验不用
             optimizer = optim.Adam(model.parameters(), lr=self.lr, weight_decay=self.wdecay)
-
+        #r_train_loss, r_train_acc = 0., 0
+        batch_time, batch_count, batch_size, total_time = 0.0, 0, 0, time.time()
         #epoch训练
         #这里的epoch数是自适应调整的
         #遍历从 0 到 self.num_epoch - 1 的整数，并把每个整数赋值给变量 epoch
         for epoch in range(self.num_epoch):
-            train_loss, correct, total = 0., 0, 0
+            train_loss, correct, total = 0., 0, 0  #.是表示浮点数的小数点
 
             #遍历训练数据中的每个 batch
             #input 是一个输入张量，labels 是对应的标签张量，
             for input, labels in data:
+                batch_count+=1  #tao_i
+                '''
+                if(batch_count>=传来的迭代次数)
+                    break
+                '''
                 #将输入和标签移到指定的设备（CPU 或 GPU）上进行计算。
                 input, labels = input.to(self.device), labels.to(self.device)
                 #每次更新前清空梯度，否则会累加到下一次更新中，导致模型参数不正确
@@ -93,6 +100,7 @@ class Trainer:
                 #input.size(0)返回的是当前 mini-batch 的大小，而total是用来记录当前客户端已经处理过的样本总数
                 #用于计算模型的准确率
                 total += input.size(0)
+                batch_size=input.size(0)
 
                 #backward()用于计算梯度， backward()方法之前，需要将之前的梯度清零
                 loss.backward()
@@ -110,16 +118,21 @@ class Trainer:
             #平均损失函数值。
             train_loss = train_loss / total
             #在控制台中输出当前训练的状态信息
-            sys.stdout.write('\rEpoch {}/{} TrainLoss {:.6f} TrainAcc {:.4f}'.format(epoch+1, self.num_epoch,
+            sys.stdout.write('\rEpoch {}/{} TrainLoss {:.6f} TrainAcc {:.4f}'.format(epoch+1,
+                                                                                     self.num_epoch,
                                                                                      train_loss, train_acc))
 
+            #r_train_loss=train_loss
+            #r_train_acc=train_acc
+        batch_time = (time.time()-total_time) / batch_count
         if tracking:
             #在每个 epoch 训练完成后，如果tracking参数为 True，则在控制台打印一个换行符，以便下一行输出
             print()
         #将Trainer类中的self.model属性更新为当前的模型
         self.model = model
+        batch_loss=train_loss*batch_size
         #返回训练集的准确率 train_acc 和损失 train_loss
-        return train_acc, train_loss
+        return train_acc , train_loss, batch_time, batch_loss
 
     def train_E0(self, data, tracking=True):
         model = self.model
