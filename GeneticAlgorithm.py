@@ -61,13 +61,10 @@ class GeneticAlgorithm:
     def initialize_population(self):
         # 在给定范围内随机初始化种群
         '''
-        这行代码返回一个形状为 (population_size, chromosome_length) 的 NumPy 数组
-        数组中的每个元素都是一个浮点数，表示染色体上每个基因的值。这些值是通过在 lower_bound 和 upper_bound 之间随机生成的
-        np.random.rand(self.population_size, self.chromosome_length)
-        生成一个形状为 (population_size, chromosome_length) 的随机数组，每个元素的值在 0 和 1 之间。
-        然后，将这个数组的每个元素乘以 upper_bound - lower_bound，并将结果加上 lower_bound，得到每个基因在指定范围内随机生成的值。
+        生成一个形状为 (self.population_size, self.chromosome_length) 的数组，
+        数组中的每个元素都是在 self.lower_bound 和 self.upper_bound 之间
         '''
-        return self.lower_bound + np.random.rand(self.population_size, self.chromosome_length) * (self.upper_bound - self.lower_bound)
+        return np.random.randint(self.lower_bound, self.upper_bound + 1, (self.population_size, self.chromosome_length))
 
     def fitness(self):
         # 计算种群中每个个体的适应度
@@ -164,6 +161,13 @@ class GeneticAlgorithm:
             if generation % self.migration_interval == 0:
                 self.migrate()
             '''
+        # 在所有的进化过程结束后，找出种群中适应度最小的个体
+        fitness_values = self.fitness()
+        best_index = np.argmax(fitness_values)
+        self.best_solution = self.population[best_index]
+
+        # 打印出最优解
+        print("The best solution is: ", self.best_solution)
 
 
 # 分布式遗传算法
@@ -178,3 +182,10 @@ class DistributedGeneticAlgorithm:
             for algorithm in self.algorithms:
                 executor.submit(algorithm.run)
 '''
+if __name__ == "__main__":
+    iter_times=[1.23, 6.91, 4.82]
+    loss_contributions=[78.2,47.5,33.1]
+    data_values=[33.1,67.9,49.2]
+    # 创建类的实例
+    my_instance = GeneticAlgorithm(iter_times,loss_contributions,data_values,50,3,10,100,0.6,0.3,100,10,2)
+    my_instance.run()
