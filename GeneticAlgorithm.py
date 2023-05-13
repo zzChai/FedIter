@@ -183,9 +183,9 @@ class DistributedGeneticAlgorithm:
                 executor.submit(algorithm.run)
 '''
 if __name__ == "__main__":
-    iter_times=[1.23, 6.91, 4.82]
-    loss_contributions=[78.2,47.5,33.1]
-    data_values=[33.1,67.9,49.2]
+    iter_times=[9.23, 36.91, 10.82]
+    loss_contributions=[68.2,147.5,33.1]
+    data_values=[23.1,167.9,99.2]
     # 创建类的实例
     my_instance = GeneticAlgorithm(iter_times,loss_contributions,data_values,50,3,10,100,0.6,0.3,100,10,2)
     my_instance.run()
